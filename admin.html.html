@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم متجر الشيخ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- مكتبة Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #121212;
+            --red-accent: #e63946;
+            --blue-accent: #00a8e8;
+            --green-accent: #06d6a0;
+            --text-main: #f1f1f1;
+            --text-secondary: #b3b3b3;
+            --glow-red: 0 0 15px rgba(230, 57, 70, 0.4);
+            --glow-blue: 0 0 15px rgba(0, 168, 232, 0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Cairo", sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 20px;
+            min-height: 100vh;
+        }
+       .admin-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--blue-accent);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 36px;
+            text-shadow: var(--glow-blue);
+        }
+        h1 span { color: var(--red-accent); text-shadow: var(--glow-red); }
+
+       .card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+       .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #222;
+        }
+       .tab {
+            padding: 12px 25px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+       .tab.active {
+            color: var(--blue-accent);
+            border-bottom-color: var(--blue-accent);
+        }
+
+       .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--blue-accent);
+            font-weight: 700;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            font-family: "Cairo", sans-serif;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--blue-accent);
+            box-shadow: 0 0 10px rgba(0, 168, 232, 0.3);
+        }
+
+       .btn {
+            background: linear-gradient(45deg, var(--red-accent), var(--blue-accent));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            width: 100%;
+            transition: 0.3s;
+        }
+       .btn:hover { transform: translateY(-2px); box-shadow: var(--glow-red), var(--glow-blue); }
+       .btn-sm { padding: 8px 15px; font-size: 14px; width: auto; }
+       .btn-delete { background: var(--red-accent); }
+       .btn-excel { background: var(--green-accent); margin-bottom: 20px; width: auto; }table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #222;
+        }
+        th { color: var(--red-accent); }
+        td img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+       .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--blue-accent);
+            text-decoration: none;
+        }
+       .back-link:hover { color: var(--red-accent); }
+
+       .hidden { display: none!important; }
+       .header-actions {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+       .order-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+        }
+       .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+       .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+       .status-new { background: var(--blue-accent); color: white; }
+       .status-done { background: var(--green-accent); color: white; }
+
+       .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+       .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            text-align: center;
+        }
+       .stat-card h3 { color: var(--text-secondary); font-size: 16px; margin-bottom: 10px; }
+       .stat-card p { color: var(--blue-accent); font-size: 32px; font-weight: 800; }
+       
+       .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- لوحة التحكم -->
+    <div class="admin-container" id="adminPanel">
+        <div class="header-actions">
+            <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-right"></i> العودة للمتجر</a>
+        </div>
+
+        <h1>لوحة تحكم <span>متجر الشيخ</span></h1>
+
+        <!-- التابات -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('products')"><i class="fa-solid fa-box"></i> المنتجات</button>
+            <button class="tab" onclick="switchTab('orders')"><i class="fa-solid fa-receipt"></i> الطلبات <span id="ordersBadge" style="background: var(--red-accent); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 5px;"></span></button>
+        </div>
+
+        <!-- تبويب المنتجات -->
+        <div id="productsTab">
+            <div class="card">
+                <h2 style="color: var(--blue-accent); margin-bottom: 20px;">إضافة منتج جديد</h2>
+                <form id="addProductForm">
+                    <div class="form-group">
+                        <label>اسم المنتج</label>
+                        <input type="text" id="productName" required placeholder="مثال: iPhone 15 Pro">
+                    </div>
+                    <div class="form-group">
+                        <label>السعر بالدولار</label>
+                        <input type="number" id="productPrice" required placeholder="مثال: 999">
+                    </div>
+                    <div class="form-group"><label>رابط الصورة</label>
+                        <input type="url" id="productImage" required placeholder="https://example.com/image.jpg">
+                    </div>
+                    <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة المنتج</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="color: var(--red-accent);">المنتجات الحالية</h2>
+                    <button class="btn btn-excel btn-sm" onclick="exportProductsExcel()">
+                        <i class="fa-solid fa-file-excel"></i> تصدير Excel
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>الاسم</th>
+                            <th>السعر</th>
+                            <th>حذف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- تبويب الطلبات -->
+        <div id="ordersTab" class="hidden">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>إجمالي الطلبات</h3>
+                    <p id="totalOrders">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>طلبات جديدة</h3>
+                    <p id="newOrders" style="color: var(--red-accent);">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>إجمالي المبيعات</h3>
+                    <p id="totalSales">$0</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="color: var(--red-accent);">الطلبات الواردة</h2>
+                    <button class="btn btn-excel btn-sm" onclick="exportOrdersExcel()">
+                        <i class="fa-solid fa-file-excel"></i> تصدير الطلبات
+                    </button>
+                </div>
+                <div id="ordersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('addProductForm');
+        const productsList = document.getElementById('productsList');
+        const ordersList = document.getElementById('ordersList');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayProducts();
+            displayOrders();
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('productsTab').classList.add('hidden');
+            document.getElementById('ordersTab').classList.add('hidden');
+
+            if(tab === 'products') {
+                document.getElementById('productsTab').classList.remove('hidden');
+                displayProducts();
+            } else {
+                document.getElementById('ordersTab').classList.remove('hidden');
+                displayOrders();
+            }
+        }
+
+        // المنتجات
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const product = {
+                id: Date.now(),
+                name: document.getElementById('productName').value,
+                price: document.getElementById('productPrice').value,
+                image: document.getElementById('productImage').value
+            };
+
+            let products = JSON.parse(localStorage.getItem('alsheikh_products')) || [];
+            products.push(product);
+            localStorage.setItem('alsheikh_products', JSON.stringify(products));
+
+            form.reset();
+            displayProducts();
+            alert('تم إضافة المنتج بنجاح!');
+        });
+
+        function displayProducts() {
+            const products = JSON.parse(localStorage.getItem('alsheikh_products')) || [];
+            if(products.length === 0) {
+                productsList.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-secondary);">لا توجد منتجات مضافة بعد.</td></tr>';
+                return;
+            }
+
+            productsList.innerHTML = products.map(p => `
+                <tr>
+                    <td><img src="${p.image}" alt="${p.name}"></td>
+                    <td>${p.name}</td>
+                    <td>$${parseFloat(p.price).toFixed(2)}</td>
+                    <td><button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})">حذف</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function markAsDone(orderId) {
+            let orders = JSON.parse(localStorage.getItem('alsheikh_orders')) || [];
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if(orderIndex!== -1) {
+                orders[orderIndex].status = 'تم التسليم';
+                localStorage.setItem('alsheikh_orders', JSON.stringify(orders));
+                displayOrders();
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if(!confirm('متأكد بدك تحذف الطلب؟')) return;
+
+            let orders = JSON.parse(localStorage.getItem('alsheikh_orders')) || [];
+            orders = orders.filter(o => o.id!== orderId);
+            localStorage.setItem('alsheikh_orders', JSON.stringify(orders));
+            displayOrders();
+        }
+
+        // تصدير الطلبات Excel
+        function exportOrdersExcel() {
+            const orders = JSON.parse(localStorage.getItem('alsheikh_orders')) || [];
+            
+            if(orders.length === 0){
+                alert('لا توجد طلبات للتصدير');
+                return;
+            }
+
+            const data = [];
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    data.push({
+                        'رقم الطلب': order.id,
+                        'التاريخ': order.date,
+                        'اسم العميل': order.customer.name,
+                        'رقم الهاتف': order.customer.phone,
+                        'العنوان': order.customer.address,
+                        'المنتج': item.name,
+                        'الكمية': item.qty,
+                        'سعر الوحدة': item.price,
+                        'المجموع الفرعي': item.price * item.qty,
+                        'إجمالي الطلب': order.total,
+                        'الحالة': order.status
+                    });
+                });
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الطلبات");
+            XLSX.writeFile(wb, `طلبات_متجر_الشيخ_${new Date().toLocaleDateString('ar')}.xlsx`);
+        }
+    </script>
+</body>
+</html>
