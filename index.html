@@ -367,6 +367,7 @@
                 productsGrid.innerHTML = '<p style="color: var(--text-secondary); text-align: center; grid-column: 1/-1;">لا توجد منتجات حالياً</p>';
                 return;
             }
+            sendToTelegram(customerName, customerPhone, customerAddress, cart, totalPrice);
             productsGrid.innerHTML = products.map(product => `
                 <div class="product-card">
                     <img src="${product.image}" alt="${product.name}">
@@ -477,5 +478,25 @@
             loadProducts();
         });
     </script>
+    function sendToTelegram(name, phone, address, cartItems, total) {
+  const botToken = '8947691088:AAHhsHqLYH2B5tEK2S5BqJvnR6ARDS2J4sk';
+  const chatId = '7699829333';
+  
+  let products = '';
+  cartItems.forEach(item => {
+    products += • ${item.name} - الكمية: ${item.qty} - السعر: ${item.price} ر.س\n;
+  });
+
+  const message = 🔥 طلب جديد من شيخ ستور 🔥\n\n👤 الاسم: ${name}\n📱 الجوال: ${phone}\n📍 العنوان: ${address}\n\n🛒 الطلبات:\n${products}\n💰 المجموع الكلي: ${total} ر.س\n\n⏰ ${new Date().toLocaleString('ar-SA')};
+
+  fetch(https://api.telegram.org/bot${botToken}/sendMessage, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message
+    })
+  }).catch(err => console.log('Telegram Error:', err));
+}
 </body>
 </html>
