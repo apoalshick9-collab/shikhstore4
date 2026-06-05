@@ -154,7 +154,6 @@
                 </table>
             </div>
         </div>
-    </div>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -174,4 +173,150 @@
         const ADMIN_PASSWORD = "123456";
 
         window.checkLogin = function() {
-            const password = document.getElement
+            const password = document.getElementById('passwordInput').value;
+            if(password === ADMIN_PASSWORD) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadStats();
+                loadProducts();
+                loadOrders();
+            } else {
+                alert('كلمة المرور غلط');
+            }
+        }
+
+        window.logout = function() {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        window.showSection = function(sectionId, element) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
+            if(element) element.classList.add('active');
+        }
+
+        async function loadStats() {
+            const productsSnapshot = await getDocs(collection(db, "products"));
+            const ordersSnapshot = await getDocs(collection(db, "orders"));
+            document.getElementById('totalProducts').textContent = productsSnapshot.size;
+            document.getElementById('totalOrders').textContent = ordersSnapshot.size;
+            let revenue = 0, newCount = 0;
+            ordersSnapshot.forEach(doc => {
+                const order = doc.data();
+                revenue += order.total || 0;
+                if(order.status === 'جديد') newCount++;
+            });
+            document.getElementById('totalRevenue').textContent = `$${revenue.toFixed(2)}`;
+            document.getElementById('newOrders').textContent = newCount;
+        }
+
+        async function loadProducts() {
+            const tbody = document.querySelector('#productsTable tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
+            const querySnapshot = await getDocs(collection(db, "products"));
+            if(querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">لا توجد منتجات</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            querySnapshot.forEach((docSnap) => {
+                const product = docSnap.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${product.image}" class="product-img"></td>
+                        <td>${product.name}</td>
+                        <td>$${product.price}</td>
+                        <td>
+                            <button class="btn btn-red btn-sm" onclick="deleteProduct('${docSnap.id}')">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const image = document.getElementById('productImage').value.trim();
+            try {
+                await addDoc(collection(db, "products"), { name, price, image });
+                alert('تمت إضافة المنتج');
+                this.reset();
+                loadProducts();
+                loadStats();
+            } catch (error) {
+                alert('خطأ: ' + error.message);
+            }
+        });
+
+        window.deleteProduct = async function(id) {
+            if(!confirm('متأكد من الحذف؟')) return;
+            await deleteDoc(doc(db, "products", id));
+            loadProducts();
+            loadStats();
+        }
+
+        async function loadOrders() {
+            const tbody = document.querySelector('#ordersTable tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
+            const querySnapshot = await getDocs(collection(db, "orders"));
+            if(querySnapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary)">لا توجد طلبات</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            querySnapshot.forEach((docSnap) => {
+                const order = docSnap.data();
+                const date = new Date(order.date).toLocaleDateString('ar-SA');
+                let statusClass = 'status-new';
+                if(order.status === 'قيد التجهيز') statusClass = 'status-processing';
+                if(order.status === 'تم التوصيل') statusClass = 'status-done';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${date}</td>
+                        <td>${order.customer.name}</td>
+                        <td>${order.customer.phone}</td>
+                        <td>$${order.total.toFixed(2)}</td>
+                        <td><span class="status ${statusClass}">${order.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm" onclick="showOrderDetails('${docSnap.id}')">
+                                <i class="fa-solid fa-eye"></i> عرض
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.showOrderDetails = async function(id) {
+            const orderDoc = await getDocs(collection(db, "orders"));
+            let order;
+            orderDoc.forEach(docSnap => {
+                if(docSnap.id === id) order = docSnap.data();
+            });
+            if(!order) return;
+            let itemsText = '';
+            order.items.forEach(item => {
+                itemsText += `${item.name} × ${item.qty} = $${(item.price * item.qty).toFixed(2)}\n`;
+            });
+            const details = `
+الزبون: ${order.customer.name}
+الجوال: ${order.customer.phone}
+العنوان: ${order.customer.address}
+
+المنتجات:
+${itemsText}
+المجموع: $${order.total.toFixed(2)}
+الحالة: ${order.status}
+            `;
+            alert(details);
+        }
+    </script>
+</body>
+</html>                        
