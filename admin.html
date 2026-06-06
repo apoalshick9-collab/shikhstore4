@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,7 @@
             --blue-accent: #00a8e8;
             --green-accent: #2ecc71;
             --orange-accent: #f39c12;
+            --purple-accent: #9b59b6;
             --text-main: #f1f1f1;
             --text-secondary: #b3b3b3;
         }
@@ -39,10 +40,14 @@
         h2 { font-family: "Tajawal", sans-serif; color: var(--blue-accent); margin-bottom: 20px; font-size: 28px; }
        .form-group { margin-bottom: 20px; text-align: right; }
         label { display: block; margin-bottom: 8px; color: var(--blue-accent); font-weight: 700; }
-        input, textarea { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: var(--text-main); font-size: 16px; }
+        input, textarea, select { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: var(--text-main); font-size: 16px; }
+        select { cursor: pointer; }
        .btn { display: inline-block; background: linear-gradient(45deg, var(--red-accent), var(--blue-accent)); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; }
        .btn-green { background: var(--green-accent); }
        .btn-red { background: var(--red-accent); }
+       .btn-orange { background: var(--orange-accent); }
+       .btn-purple { background: var(--purple-accent); }
+       .btn-blue { background: var(--blue-accent); }
        .btn-sm { padding: 8px 15px; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 15px; text-align: right; border-bottom: 1px solid #222; }
@@ -53,9 +58,17 @@
        .status-new { background: rgba(46, 204, 113, 0.2); color: var(--green-accent); }
        .status-processing { background: rgba(243, 156, 18, 0.2); color: var(--orange-accent); }
        .status-done { background: rgba(0, 168, 232, 0.2); color: var(--blue-accent); }
+       .status-rejected { background: rgba(230, 57, 70, 0.2); color: var(--red-accent); }
+       .status-shipped { background: rgba(155, 89, 182, 0.2); color: var(--purple-accent); }
        .loader { text-align: center; padding: 40px; color: var(--green-accent); }
-       .export-bar { margin-bottom: 20px; display: flex; gap: 10px; }
-        @media (max-width: 768px) { nav { flex-direction: column; gap: 15px; }.nav-links { flex-wrap: wrap; justify-content: center; } table { font-size: 14px; } th, td { padding: 10px 5px; } }
+       .export-bar { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+       .filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+       .filter-tab { padding: 10px 20px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600; }
+       .filter-tab.active { background: var(--blue-accent); color: #000; border-color: var(--blue-accent); }
+       .filter-tab:hover { border-color: var(--blue-accent); }
+       .status-select { padding: 6px 10px; border-radius: 6px; background: #1a1a1a; border: 1px solid #333; color: var(--text-main); cursor: pointer; font-size: 13px; }
+       .actions-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+        @media (max-width: 768px) { nav { flex-direction: column; gap: 15px; }.nav-links { flex-wrap: wrap; justify-content: center; } table { font-size: 14px; } th, td { padding: 10px 5px; }.export-bar { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -70,7 +83,7 @@
     </div>
     <div class="dashboard" id="dashboard">
         <nav>
-            <div class="logo"><i class="fa-solid fa-bolt"></i>AL-SHEIKH Admin</div>
+            <div class="logo"><i class="fa-solid fa-bolt"></i> AL-SHEIKH Admin</div>
             <div class="nav-links">
                 <button class="active" onclick="showSection('stats', this)">الإحصائيات</button>
                 <button onclick="showSection('products', this)">المنتجات</button>
@@ -136,9 +149,18 @@
                 </table>
             </div>
             <div class="section" id="orders">
-                <h2>الطلبات</h2>
+                <h2>إدارة الطلبات</h2>
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterOrders('all', this)">الكل</div>
+                    <div class="filter-tab" onclick="filterOrders('جديد', this)">طلبات جديدة</div>
+                    <div class="filter-tab" onclick="filterOrders('قيد التجهيز', this)">قيد التجهيز</div>
+                    <div class="filter-tab" onclick="filterOrders('تم الشحن', this)">تم الشحن</div>
+                    <div class="filter-tab" onclick="filterOrders('تم التوصيل', this)">تم التوصيل</div>
+                    <div class="filter-tab" onclick="filterOrders('مرفوض', this)">مرفوضة</div>
+                </div>
                 <div class="export-bar">
                     <button class="btn btn-green" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
+                    <span id="ordersCount" style="color: var(--text-secondary);">جاري التحميل...</span>
                 </div>
                 <table id="ordersTable">
                     <thead>
@@ -148,18 +170,19 @@
                             <th>الجوال</th>
                             <th>المجموع</th>
                             <th>الحالة</th>
+                            <th>تغيير الحالة</th>
                             <th>تفاصيل</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td colspan="6" class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                        <tr><td colspan="7" class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
           apiKey: "AIzaSyCN1ZMiCUkuQiPZUzihRRkRR2tf_AnPqGQ",
@@ -174,6 +197,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const ADMIN_PASSWORD = "kali";
+        let currentFilter = 'all';
+        let allOrders = [];
 
         window.checkLogin = function() {
             const password = document.getElementById('passwordInput').value;
@@ -209,7 +234,7 @@
             let revenue = 0, newCount = 0;
             ordersSnapshot.forEach(doc => {
                 const order = doc.data();
-                revenue += order.total || 0;
+                if(order.status === 'تم التوصيل') revenue += order.total || 0;
                 if(order.status === 'جديد') newCount++;
             });
             document.getElementById('totalRevenue').textContent = `$${revenue.toFixed(2)}`;
@@ -266,20 +291,46 @@
         }
 
         async function loadOrders() {
+            const q = query(collection(db, "orders"), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(q);
+            allOrders = [];
+            querySnapshot.forEach((docSnap) => {
+                allOrders.push({ id: docSnap.id,...docSnap.data() });
+            });
+            renderOrders();
+        }
+
+        window.filterOrders = function(status, element) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            renderOrders();
+        }
+
+        function renderOrders() {
             const tbody = document.querySelector('#ordersTable tbody');
-            tbody.innerHTML = '<tr><td colspan="6" class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
-            const querySnapshot = await getDocs(collection(db, "orders"));
-            if(querySnapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary)">لا توجد طلبات</td></tr>';
+            let filteredOrders = allOrders;
+            
+            if(currentFilter!== 'all') {
+                filteredOrders = allOrders.filter(order => order.status === currentFilter);
+            }
+
+            document.getElementById('ordersCount').textContent = `عدد الطلبات: ${filteredOrders.length}`;
+
+            if(filteredOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary)">لا توجد طلبات</td></tr>';
                 return;
             }
+
             tbody.innerHTML = '';
-            querySnapshot.forEach((docSnap) => {
-                const order = docSnap.data();
-                const date = new Date(order.date).toLocaleDateString('ar-SA');
+            filteredOrders.forEach((order) => {
+                const date = new Date(order.date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
                 let statusClass = 'status-new';
                 if(order.status === 'قيد التجهيز') statusClass = 'status-processing';
                 if(order.status === 'تم التوصيل') statusClass = 'status-done';
+                if(order.status === 'مرفوض') statusClass = 'status-rejected';
+                if(order.status === 'تم الشحن') statusClass = 'status-shipped';
+                
                 tbody.innerHTML += `
                     <tr>
                         <td>${date}</td>
@@ -288,8 +339,20 @@
                         <td>$${order.total.toFixed(2)}</td>
                         <td><span class="status ${statusClass}">${order.status}</span></td>
                         <td>
-                            <button class="btn btn-sm" onclick="showOrderDetails('${docSnap.id}')">
-                                <i class="fa-solid fa-eye"></i> عرض
+                            <select class="status-select" onchange="updateOrderStatus('${order.id}', this.value)">
+                                <option value="جديد" ${order.status === 'جديد'? 'selected' : ''}>جديد</option>
+                                <option value="قيد التجهيز" ${order.status === 'قيد التجهيز'? 'selected' : ''}>قيد التجهيز</option>
+                                <option value="تم الشحن" ${order.status === 'تم الشحن'? 'selected' : ''}>تم الشحن</option>
+                                <option value="تم التوصيل" ${order.status === 'تم التوصيل'? 'selected' : ''}>تم التوصيل</option>
+                                <option value="مرفوض" ${order.status === 'مرفوض'? 'selected' : ''}>مرفوض</option>
+                            </select>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="btn btn-blue btn-sm" onclick="showOrderDetails('${order.id}')">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button class="btn btn-red btn-sm" onclick="deleteOrder('${order.id}')">
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -297,12 +360,25 @@
             });
         }
 
-        window.showOrderDetails = async function(id) {
-            const orderDoc = await getDocs(collection(db, "orders"));
-            let order;
-            orderDoc.forEach(docSnap => {
-                if(docSnap.id === id) order = docSnap.data();
-            });
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            try {
+                await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+                loadOrders();
+                loadStats();
+            } catch (error) {
+                alert('خطأ في تحديث الحالة: ' + error.message);
+            }
+        }
+
+        window.deleteOrder = async function(id) {
+            if(!confirm('متأكد من حذف الطلب؟')) return;
+            await deleteDoc(doc(db, "orders", id));
+            loadOrders();
+            loadStats();
+        }
+
+        window.showOrderDetails = function(id) {
+            const order = allOrders.find(o => o.id === id);
             if(!order) return;
             let itemsText = '';
             order.items.forEach(item => {
@@ -317,37 +393,47 @@
 ${itemsText}
 المجموع: $${order.total.toFixed(2)}
 الحالة: ${order.status}
+التاريخ: ${new Date(order.date).toLocaleString('ar-SA')}
             `;
             alert(details);
         }
 
         window.exportToExcel = function() {
-            const table = document.querySelector('#ordersTable');
-            if (!table || table.rows.length <= 1) {
+            let ordersToExport = allOrders;
+            if(currentFilter!== 'all') {
+                ordersToExport = allOrders.filter(order => order.status === currentFilter);
+            }
+            
+            if (ordersToExport.length === 0) {
                 alert('لا يوجد طلبات للتصدير');
                 return;
             }
 
-            let csv = [];
-            const rows = table.querySelectorAll('tr');
-
-            for (let row of rows) {
-                let cols = row.querySelectorAll('td, th');
-                let rowData = [];
-                for (let i = 0; i < cols.length - 1; i++) {
-                    let text = cols[i].innerText.replace(/"/g, '""');
-                    rowData.push('"' + text + '"');
-                }
-                csv.push(rowData.join(','));
-            }
+            let csv = ['التاريخ,الزبون,الجوال,العنوان,المجموع,الحالة,المنتجات'];
+            
+            ordersToExport.forEach(order => {
+                const date = new Date(order.date).toLocaleDateString('ar-SA');
+                const items = order.items.map(item => `${item.name}(${item.qty})`).join(' | ');
+                const row = [
+                    date,
+                    order.customer.name,
+                    order.customer.phone,
+                    order.customer.address,
+                    order.total.toFixed(2),
+                    order.status,
+                    items
+                ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+                csv.push(row);
+            });
 
             const csvContent = '\uFEFF' + csv.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
+            const filterName = currentFilter === 'all'? 'كل' : currentFilter;
 
             link.setAttribute('href', url);
-            link.setAttribute('download', `طلبات_متجر_الشيخ_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.csv`);
+            link.setAttribute('download', `طلبات_${filterName}_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -355,4 +441,4 @@ ${itemsText}
         }
     </script>
 </body>
-</html>
+</html>                 
