@@ -1,167 +1,207 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إنترنت فائق السرعة</title>
+    <title>شام نت - إنترنت فضائي بسرعة الضوء</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        :root {
+            --space-dark: #0B0E23; --space-blue: #00D9FF; --space-purple: #7B2FFF;
+            --space-pink: #FF2E63; --text-main: #FFFFFF; --text-secondary: #B8C5D6;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #fff; }
-       .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-       .header { text-align: center; padding: 40px 0; }
-       .header h1 { font-size: 3rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-       .packages { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin: 40px 0; }
-       .package { background: #1e293b; border-radius: 20px; padding: 30px; border: 2px solid #334155; cursor: pointer; transition: all 0.3s; }
-       .package:hover { border-color: #667eea; transform: translateY(-5px); }
-       .package.selected { border-color: #667eea; background: #334155; }
-       .package h3 { font-size: 1.8rem; margin-bottom: 15px; color: #667eea; }
-       .speed { font-size: 2.5rem; font-weight: bold; margin: 15px 0; }
-       .price { font-size: 2rem; color: #10b981; margin: 15px 0; }
-       .features { list-style: none; margin: 20px 0; }
-       .features li { padding: 8px 0; color: #cbd5e1; }
-       .features li:before { content: "✓ "; color: #10b981; font-weight: bold; margin-left: 8px; }
-       .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
-       .modal.active { display: flex; align-items: center; justify-content: center; }
-       .modal-content { background: #1e293b; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-       .form-group { margin-bottom: 20px; }
-       .form-group label { display: block; margin-bottom: 8px; color: #cbd5e1; }
-       .form-group input,.form-group select { width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 10px; color: #fff; font-size: 1rem; }
-       .form-group input:focus { border-color: #667eea; outline: none; }
-       .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 10px; }
-       .btn:hover { opacity: 0.9; }
-       .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-       .close { float: left; font-size: 28px; cursor: pointer; color: #cbd5e1; }
-       .message { padding: 15px; border-radius: 10px; margin: 15px 0; text-align: center; }
-       .success { background: #10b981; }
-       .error { background: #ef4444; }
-       .info { background: #3b82f6; }
-       .payment-box { background: #0f172a; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #334155; }
+        body { font-family: "Cairo", sans-serif; background: var(--space-dark); color: var(--text-main); overflow-x: hidden; }
+       .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%); }
+        nav { position: fixed; top: 0; width: 100%; padding: 20px 5%; background: rgba(11, 14, 35, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 217, 255, 0.2); z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+       .logo { font-family: "Tajawal", sans-serif; font-size: 28px; font-weight: 900; background: linear-gradient(45deg, var(--space-blue), var(--space-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+       .nav-links { display: flex; gap: 30px; }
+       .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 600; transition: 0.3s; }
+       .nav-links a:hover { color: var(--space-blue); }
+       .btn { padding: 12px 30px; border-radius: 50px; font-weight: 700; text-decoration: none; transition: 0.3s; border: none; cursor: pointer; display: inline-block; }
+       .btn-primary { background: linear-gradient(45deg, var(--space-blue), var(--space-purple)); color: white; }
+       .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4); }
+       .btn-success { background: linear-gradient(45deg, #00ff88, #00cc6a); color: white; }
+       .btn-success:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4); }
+       .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 5% 60px; position: relative; z-index: 1; }
+       .hero-content { max-width: 900px; }
+       .hero h1 { font-family: "Tajawal", sans-serif; font-size: 64px; font-weight: 900; margin-bottom: 20px; line-height: 1.2; }
+       .hero h1 span { background: linear-gradient(45deg, var(--space-blue), var(--space-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+       .hero p { font-size: 22px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.8; }
+       .section { padding: 100px 5%; position: relative; z-index: 1; }
+       .section-title { text-align: center; font-family: "Tajawal", sans-serif; font-size: 48px; font-weight: 900; margin-bottom: 60px; }
+       .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+       .price-card { background: var(--card-bg); border: 1px solid rgba(123, 47, 255, 0.3); border-radius: 20px; padding: 50px 40px; text-align: center; backdrop-filter: blur(10px); position: relative; transition: 0.3s; }
+       .price-card.featured { border: 2px solid var(--space-blue); transform: scale(1.05); }
+       .price-card.featured::before { content: "الأكثر طلباً"; position: absolute; top: -15px; right: 50%; transform: translateX(50%); background: linear-gradient(45deg, var(--space-blue), var(--space-purple)); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+       .price-card h3 { font-size: 28px; margin-bottom: 10px; }
+       .price { font-size: 56px; font-weight: 900; margin: 20px 0; background: linear-gradient(45deg, var(--space-blue), var(--space-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+       .price span { font-size: 18px; color: var(--text-secondary); }
+       .price-features { list-style: none; margin: 30px 0; text-align: right; }
+       .price-features li { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+       .price-features li i { color: var(--space-blue); margin-left: 10px; }
+       .order-form { max-width: 600px; margin: 60px auto 0; background: var(--card-bg); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 20px; padding: 40px; backdrop-filter: blur(10px); }
+       .form-group { margin-bottom: 20px; text-align: right; }
+       .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); }
+       .form-group input,.form-group select { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 217, 255, 0.3); background: rgba(0, 0, 0, 0.3); color: var(--text-main); font-family: "Cairo"; font-size: 16px; }
+       .form-group input:focus,.form-group select:focus { outline: none; border-color: var(--space-blue); }
+       .payment-section { background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 15px; padding: 25px; margin: 25px 0; display: none; }
+       .payment-section.show { display: block; }
+       .payment-section h4 { color: var(--space-blue); margin-bottom: 15px; font-size: 20px; }
+       .payment-info { background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 15px; line-height: 1.8; }
+        footer { background: rgba(0, 0, 0, 0.5); border-top: 1px solid rgba(0, 217, 255, 0.2); padding: 60px 5% 30px; text-align: center; position: relative; z-index: 1; }
+       .loading-msg { text-align: center; color: var(--text-secondary); grid-column: 1 / -1; }
+       .error-msg { text-align: center; color: #FF2E63; grid-column: 1 / -1; }
+        @media (max-width: 768px) {.hero h1 { font-size: 40px; }.nav-links { display: none; }.price-card.featured { transform: scale(1); } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 إنترنت فائق السرعة</h1>
-            <p style="color: #cbd5e1; font-size: 1.2rem; margin-top: 10px;">اختر الباقة اللي تناسبك</p>
+    <div class="stars"></div>
+    <nav>
+        <div class="logo"><i class="fa-solid fa-satellite-dish"></i> شام نت</div>
+        <div class="nav-links">
+            <a href="#home">الرئيسية</a>
+            <a href="#pricing">الباقات</a>
+            <a href="#order">اطلب الآن</a>
         </div>
+        <a href="#order" class="btn btn-primary">اشترك الآن</a>
+    </nav>
 
-        <div class="packages" id="packages"></div>
-    </div>
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>إنترنت فضائي <span>بسرعة الضوء</span><br>من الفضاء لبيتك مباشرة</h1>
+            <p>مع شام نت، ودّع الانقطاعات وبطء النت. تقنية الأقمار الصناعية منخفضة المدار تغطي سوريا كاملة بسرعات تصل لـ 250 ميجا</p>
+        </div>
+    </section>
 
-    <div class="modal" id="orderModal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 style="margin-bottom: 20px; color: #667eea;">تأكيد الطلب</h2>
-            <div id="selectedPackageInfo" style="background: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 20px;"></div>
+    <section class="section" id="pricing">
+        <h2 class="section-title">باقاتنا <span style="color: var(--space-blue)">للبيوت</span></h2>
+        <div class="pricing" id="pricingContainer">
+            <p class="loading-msg">جاري تحميل الباقات...</p>
+        </div>
+    </section>
 
-            <div class="payment-box">
-                <p style="color: #10b981; font-weight: bold; margin-bottom: 8px;">💳 طريقة الدفع:</p>
-                <p style="color: #cbd5e1;">حول على سيريتل كاش: 0999123456</p>
-                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px;">بعد التحويل، اكتب رقم العملية تحت</p>
-            </div>
-
+    <section class="section" id="order">
+        <h2 class="section-title">اطلب <span style="color: var(--space-blue)">اشتراكك</span></h2>
+        <div class="order-form">
             <form id="orderForm">
                 <div class="form-group">
                     <label>الاسم الكامل *</label>
-                    <input type="text" id="customerName" required>
+                    <input type="text" id="customerName" required placeholder="محمد أحمد">
                 </div>
                 <div class="form-group">
-                    <label>رقم الهاتف *</label>
-                    <input type="tel" id="customerPhone" required>
+                    <label>رقم الموبايل *</label>
+                    <input type="tel" id="customerPhone" required placeholder="0999123456">
                 </div>
                 <div class="form-group">
-                    <label>المدينة *</label>
-                    <input type="text" id="customerCity" required>
+                    <label>المحافظة *</label>
+                    <input type="text" id="customerCity" required placeholder="دمشق">
                 </div>
                 <div class="form-group">
-                    <label>رقم عملية التحويل (اختياري)</label>
-                    <input type="text" id="paymentCode" placeholder="مثال: 123456789">
-                    <small style="color: #94a3b8; display: block; margin-top: 5px;">اذا حولت، اكتب رقم العملية للتأكيد</small>
+                    <label>اختر الباقة *</label>
+                    <select id="selectedPackage" required>
+                        <option value="">جاري تحميل الباقات...</option>
+                    </select>
                 </div>
-                <div id="formMessage"></div>
-                <button type="submit" class="btn" id="submitBtn">تأكيد الطلب</button>
+
+                <div class="payment-section" id="paymentSection">
+                    <h4><i class="fa-solid fa-credit-card"></i> الدفع عبر الشام كاش - اختياري</h4>
+                    <div class="payment-info">
+                        <strong>رقم حساب شام كاش:</strong> 1234567890<br>
+                        <strong>الاسم:</strong> شام نت<br>
+                        <strong>ملاحظة:</strong> حول المبلغ + اكتب رقمك بالملاحظات، واكتب رقم العملية تحت
+                    </div>
+                    <div class="form-group">
+                        <label>رقم عملية التحويل</label>
+                        <input type="text" id="paymentCode" placeholder="مثال: 123456789">
+                        <small style="color: #94a3b8; display: block; margin-top: 5px;">اذا حولت، اكتب رقم العملية للتأكيد</small>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-success" style="width: 100%; margin-bottom: 15px;" id="showPaymentBtn">
+                    <i class="fa-solid fa-wallet"></i> الدفع عبر الشام كاش
+                </button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-paper-plane"></i> إرسال الطلب
+                </button>
             </form>
+            <p id="orderMsg" style="text-align: center; margin-top: 20px; color: var(--space-blue);"></p>
         </div>
-    </div>
+    </section>
+
+    <footer>
+        <p style="color: var(--text-secondary);">© 2026 شام نت. جميع الحقوق محفوظة.</p>
+    </footer>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC8dxXXX",
-            authDomain: "flutter-ai-playground-c3bb0.firebaseapp.com",
-            projectId: "flutter-ai-playground-c3bb0",
-            storageBucket: "flutter-ai-playground-c3bb0.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
+            apiKey: "AIzaSyAg0LGjb6rcMlMZUn15R73_pX2VXBOp0Xc",
+            authDomain: "syriastore1-dcee8.firebaseapp.com",
+            projectId: "syriastore1-dcee8",
+            storageBucket: "syriastore1-dcee8.firebasestorage.app",
+            messagingSenderId: "938774399039",
+            appId: "1:938774399039:web:72d8b51051043b69a6d08a"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let selectedPkg = null;
+        let packages = [];
+
+        document.getElementById('showPaymentBtn').onclick = () => {
+            document.getElementById('paymentSection').classList.toggle('show');
+        };
 
         async function loadPackages() {
-            const packagesDiv = document.getElementById('packages');
-            packagesDiv.innerHTML = '<div style="text-align:center;grid-column:1/-1">جاري التحميل...</div>';
-
             try {
                 const querySnapshot = await getDocs(collection(db, "packages"));
-                packagesDiv.innerHTML = '';
+                const container = document.getElementById('pricingContainer');
+                const select = document.getElementById('selectedPackage');
+                container.innerHTML = '';
+                select.innerHTML = '<option value="">اختر باقتك</option>';
+                packages = [];
 
                 if (querySnapshot.empty) {
-                    packagesDiv.innerHTML = '<div class="message error">مافي باقات مضافة لسه. ضيف من Firestore</div>';
+                    container.innerHTML = '<p class="loading-msg">لا توجد باقات حالياً</p>';
                     return;
                 }
 
                 querySnapshot.forEach((doc) => {
-                    const pkg = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'package';
-                    div.innerHTML = `
-                        <h3>${pkg.name}</h3>
-                        <div class="speed">${pkg.speed}</div>
-                        <div class="price">${pkg.price} ل.س / شهرياً</div>
-                        <ul class="features">
-                            ${pkg.features.map(f => `<li>${f}</li>`).join('')}
-                        </ul>
+                    const pkg = { id: doc.id,...doc.data() };
+                    packages.push(pkg);
+                    container.innerHTML += `
+                        <div class="price-card ${pkg.featured? 'featured' : ''}">
+                            <h3>${pkg.name}</h3>
+                            <div class="price">$${pkg.price}<span>/شهر</span></div>
+                            <ul class="price-features">
+                                <li><i class="fa-solid fa-check"></i> سرعة ${pkg.speed} Mbps</li>
+                                ${pkg.features && Array.isArray(pkg.features)? pkg.features.map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join('') : ''}
+                            </ul>
+                        </div>
                     `;
-                    div.onclick = () => selectPackage(pkg, div);
-                    packagesDiv.appendChild(div);
+                    select.innerHTML += `<option value="${pkg.id}">${pkg.name} - ${pkg.speed} Mbps - $${pkg.price}</option>`;
                 });
             } catch (error) {
-                console.error(error);
-                packagesDiv.innerHTML = '<div class="message error">خطأ بتحميل الباقات. تأكد من الـ Rules والـ Collection</div>';
+                document.getElementById('pricingContainer').innerHTML = `<p class="error-msg">خطأ بتحميل الباقات: ${error.message}</p>`;
             }
         }
 
-        function selectPackage(pkg, element) {
-            document.querySelectorAll('.package').forEach(p => p.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedPkg = pkg;
-
-            document.getElementById('selectedPackageInfo').innerHTML = `
-                <h3 style="color: #667eea;">${pkg.name}</h3>
-                <p><strong>السرعة:</strong> ${pkg.speed}</p>
-                <p><strong>السعر:</strong> ${pkg.price} ل.س / شهرياً</p>
-            `;
-
-            document.getElementById('orderModal').classList.add('active');
-        }
-
-        window.closeModal = function() {
-            document.getElementById('orderModal').classList.remove('active');
-            document.getElementById('orderForm').reset();
-            document.getElementById('formMessage').innerHTML = '';
-        }
-
-        document.getElementById('orderForm').onsubmit = async (e) => {
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const msg = document.getElementById('formMessage');
+            const msg = document.getElementById('orderMsg');
+            msg.textContent = 'جاري إرسال طلبك...';
+            msg.style.color = 'var(--space-blue)';
 
-            btn.disabled = true;
-            msg.innerHTML = '<div class="message info">جاري إرسال طلبك...</div>';
+            const selectedPkg = packages.find(p => p.id === document.getElementById('selectedPackage').value);
+            if (!selectedPkg) {
+                msg.textContent = '❌ اختر باقة أول';
+                msg.style.color = '#FF2E63';
+                return;
+            }
 
             try {
                 const paymentCode = document.getElementById('paymentCode').value.trim();
@@ -174,25 +214,21 @@
                     packageSpeed: selectedPkg.speed,
                     packagePrice: selectedPkg.price,
                     paymentCode: paymentCode || 'غير مدخل',
-                    paymentStatus: paymentCode ? 'تم الدفع' : 'بانتظار الدفع',
+                    paymentStatus: paymentCode? 'تم الدفع' : 'بانتظار الدفع',
                     status: 'جديد',
                     createdAt: serverTimestamp()
                 });
 
-                msg.innerHTML = '<div class="message success">✅ تم إرسال طلبك بنجاح! رح نتواصل معك قريباً</div>';
-                setTimeout(() => {
-                    closeModal();
-                }, 3000);
-
+                msg.textContent = '✅ تم استلام طلبك! رح نتواصل معك خلال 24 ساعة';
+                msg.style.color = 'var(--space-blue)';
+                document.getElementById('orderForm').reset();
+                document.getElementById('paymentSection').classList.remove('show');
             } catch (error) {
-                console.error(error);
-                msg.innerHTML = '<div class="message error">❌ صار خطأ. تأكد من الـ Rules</div>';
-            } finally {
-                btn.disabled = false;
+                msg.textContent = '❌ صار خطأ: ' + error.message;
+                msg.style.color = '#FF2E63';
             }
-        }
-
+        });
         loadPackages();
     </script>
 </body>
-</html>
+</html>                    
