@@ -35,6 +35,7 @@
        .success { background: #10b981; }
        .error { background: #ef4444; }
        .info { background: #3b82f6; }
+       .payment-box { background: #0f172a; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -53,6 +54,12 @@
             <h2 style="margin-bottom: 20px; color: #667eea;">تأكيد الطلب</h2>
             <div id="selectedPackageInfo" style="background: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 20px;"></div>
 
+            <div class="payment-box">
+                <p style="color: #10b981; font-weight: bold; margin-bottom: 8px;">💳 طريقة الدفع:</p>
+                <p style="color: #cbd5e1;">حول على سيريتل كاش: 0999123456</p>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px;">بعد التحويل، اكتب رقم العملية تحت</p>
+            </div>
+
             <form id="orderForm">
                 <div class="form-group">
                     <label>الاسم الكامل *</label>
@@ -67,9 +74,9 @@
                     <input type="text" id="customerCity" required>
                 </div>
                 <div class="form-group">
-                    <label>صورة إيصال الدفع (اختياري)</label>
-                    <input type="file" id="paymentProof" accept="image/*">
-                    <small style="color: #94a3b8; display: block; margin-top: 5px;">ارفع صورة التحويل أو الإيصال</small>
+                    <label>رقم عملية التحويل (اختياري)</label>
+                    <input type="text" id="paymentCode" placeholder="مثال: 123456789">
+                    <small style="color: #94a3b8; display: block; margin-top: 5px;">اذا حولت، اكتب رقم العملية للتأكيد</small>
                 </div>
                 <div id="formMessage"></div>
                 <button type="submit" class="btn" id="submitBtn">تأكيد الطلب</button>
@@ -94,7 +101,6 @@
         const db = getFirestore(app);
         let selectedPkg = null;
 
-        // تحميل الباقات
         async function loadPackages() {
             const packagesDiv = document.getElementById('packages');
             packagesDiv.innerHTML = '<div style="text-align:center;grid-column:1/-1">جاري التحميل...</div>';
@@ -102,6 +108,11 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "packages"));
                 packagesDiv.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    packagesDiv.innerHTML = '<div class="message error">مافي باقات مضافة لسه. ضيف من Firestore</div>';
+                    return;
+                }
 
                 querySnapshot.forEach((doc) => {
                     const pkg = doc.data();
@@ -119,8 +130,8 @@
                     packagesDiv.appendChild(div);
                 });
             } catch (error) {
-                packagesDiv.innerHTML = '<div class="message error">خطأ بتحميل الباقات. تأكد من الـ Rules</div>';
                 console.error(error);
+                packagesDiv.innerHTML = '<div class="message error">خطأ بتحميل الباقات. تأكد من الـ Rules والـ Collection</div>';
             }
         }
 
@@ -153,19 +164,7 @@
             msg.innerHTML = '<div class="message info">جاري إرسال طلبك...</div>';
 
             try {
-                const paymentProofFile = document.getElementById('paymentProof').files[0];
-                let paymentProofUrl = '';
-
-                // تحويل الصورة لـ Base64 بدل رفعها على Storage
-                if (paymentProofFile) {
-                    msg.innerHTML = '<div class="message info">جاري معالجة صورة الدفع...</div>';
-                    paymentProofUrl = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(paymentProofFile);
-                    });
-                }
+                const paymentCode = document.getElementById('paymentCode').value.trim();
 
                 await addDoc(collection(db, "orders"), {
                     name: document.getElementById('customerName').value,
@@ -174,8 +173,8 @@
                     packageName: selectedPkg.name,
                     packageSpeed: selectedPkg.speed,
                     packagePrice: selectedPkg.price,
-                    paymentProof: paymentProofUrl,
-                    paymentStatus: paymentProofUrl? 'تم الدفع' : 'بانتظار الدفع',
+                    paymentCode: paymentCode || 'غير مدخل',
+                    paymentStatus: paymentCode ? 'تم الدفع' : 'بانتظار الدفع',
                     status: 'جديد',
                     createdAt: serverTimestamp()
                 });
@@ -187,7 +186,7 @@
 
             } catch (error) {
                 console.error(error);
-                msg.innerHTML = '<div class="message error">❌ صار خطأ. حاول مرة تانية</div>';
+                msg.innerHTML = '<div class="message error">❌ صار خطأ. تأكد من الـ Rules</div>';
             } finally {
                 btn.disabled = false;
             }
